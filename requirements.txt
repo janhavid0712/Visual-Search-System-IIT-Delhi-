@@ -1,0 +1,10 @@
+streamlit
+numpy
+torch
+timm
+faiss-cpu
+joblib
+pillow
+torchvision
+openai
+python-dotenv

@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+unsplash_images/
+embeddings_dino_small/
+*.zip
+.DS_Store
