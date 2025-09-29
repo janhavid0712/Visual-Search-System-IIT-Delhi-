@@ -1,8 +1,6 @@
 import os
 import zipfile
 import io
-from dotenv import load_dotenv
-load_dotenv()  # Load OPENAI_API_KEY from .env
 
 # === Fix OpenMP runtime error ===
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -25,8 +23,9 @@ from openai import OpenAI
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # === CONFIG ===
-SAVE_DIR = r"C:\Users\deshp\IITD_NEW\embeddings_dino_small"
-IMAGE_ROOT_DIR = r"C:\Users\deshp\IITD_NEW\unsplash_images"
+BASE_DIR = os.path.dirname(__file__)  # root of repo
+SAVE_DIR = os.path.join(BASE_DIR, "embeddings_dino_small")
+IMAGE_ROOT_DIR = os.path.join(BASE_DIR, "unsplash_images")
 K = 50  # Number of similar images to retrieve
 
 # === Load model ===
@@ -51,8 +50,10 @@ def get_transform():
 # === Load FAISS index and paths ===
 @st.cache_resource
 def load_index_and_paths():
-    index = faiss.read_index(os.path.join(SAVE_DIR, "dino_small_index.faiss"))
-    paths = np.load(os.path.join(SAVE_DIR, "dino_small_image_paths_2.npy"), allow_pickle=True)
+    index_path = os.path.join(SAVE_DIR, "dino_small_index.faiss")
+    paths_path = os.path.join(SAVE_DIR, "dino_small_image_paths_2.npy")
+    index = faiss.read_index(index_path)
+    paths = np.load(paths_path, allow_pickle=True)
     return index, paths
 
 # === Extract DINO embedding ===
@@ -69,8 +70,10 @@ def get_embedding(image: Image.Image, model, device):
 # === Classifier loader ===
 @st.cache_resource
 def load_classifier():
-    clf = joblib.load(os.path.join(SAVE_DIR, "category_classifier.pkl"))
-    classes = np.load(os.path.join(SAVE_DIR, "category_label_encoder.npy"), allow_pickle=True)
+    clf_path = os.path.join(SAVE_DIR, "category_classifier.pkl")
+    labels_path = os.path.join(SAVE_DIR, "category_label_encoder.npy")
+    clf = joblib.load(clf_path)
+    classes = np.load(labels_path, allow_pickle=True)
     return clf, classes
 
 # === Classify and optionally save ===
@@ -142,7 +145,7 @@ def generate_writeup(image: Image.Image = None, query: str = None):
 # === UI ===
 st.set_page_config(page_title="DINO Image Explorer", layout="wide")
 
-# Tabs (Removed Museum Mode)
+# Tabs
 tab_home, tab_fav = st.tabs(["🏠 Home", "⭐ Favorites"])
 
 # --- Initialize session state ---
